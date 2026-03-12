@@ -3,27 +3,19 @@ pipeline {
 
     environment {
         DOCKER_USER = "anilkumarjena22"
-        BACKEND_IMAGE = "dtm-backend"
-        FRONTEND_IMAGE = "dtm-frontend"
     }
 
     stages {
 
-        stage('Clone Repository') {
-            steps {
-                git 'https://github.com/anilkj-hub/devops-task-manager.git'
-            }
-        }
-
         stage('Build Backend Image') {
             steps {
-                sh 'docker build -t $DOCKER_USER/$BACKEND_IMAGE ./backend'
+                bat 'docker build -t %DOCKER_USER%/dtm-backend ./backend'
             }
         }
 
         stage('Build Frontend Image') {
             steps {
-                sh 'docker build -t $DOCKER_USER/$FRONTEND_IMAGE ./frontend'
+                bat 'docker build -t %DOCKER_USER%/dtm-frontend ./frontend'
             }
         }
 
@@ -34,23 +26,17 @@ pipeline {
                     usernameVariable: 'USER',
                     passwordVariable: 'PASS'
                 )]) {
-                    sh 'echo $PASS | docker login -u $USER --password-stdin'
+                    bat 'docker login -u %USER% -p %PASS%'
                 }
             }
         }
 
         stage('Push Images') {
             steps {
-                sh 'docker push $DOCKER_USER/$BACKEND_IMAGE'
-                sh 'docker push $DOCKER_USER/$FRONTEND_IMAGE'
+                bat 'docker push %DOCKER_USER%/dtm-backend'
+                bat 'docker push %DOCKER_USER%/dtm-frontend'
             }
         }
 
-        stage('Deploy Containers') {
-            steps {
-                sh 'docker compose down'
-                sh 'docker compose up -d'
-            }
-        }
     }
 }
